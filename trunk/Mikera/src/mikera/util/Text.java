@@ -2,7 +2,7 @@
 package mikera.util;
 
 import java.io.*;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /** 
 * Class containing utility functions for text manipulations
@@ -11,10 +11,21 @@ public class Text {
     public static String NL = System.getProperty("line.separator");
 
 
-	// return Roman numerals
+	/**
+	 * return Roman numerals
+	 * 
+	 * note that beyond MMMCMXCIX = 3999 we can't show roman numerals in ascii
+	 * since would require putting a line on top of V for 5000....
+	 * 
+	 */ 
 	public static String roman(int n) {
+		if (n<0) return "-"+roman(-n);
+		if (n==0) return "nullus";
+		
 		String r = "";
 		switch (n / 1000) {
+			case 0 :
+				break;
 			case 1 :
 				r += "M";
 				break;
@@ -24,6 +35,8 @@ public class Text {
 			case 3 :
 				r += "MMM";
 				break;
+			default:
+				throw new Error("Number "+r+" too big to convert to roman numerals");
 		}
 		n = n % 1000;
 
@@ -146,13 +159,37 @@ public class Text {
 		return -1;
 	}
  
-	private static final String whitespace = "                                                                                          ";
-	// return whitesapce of specified length
+	private static WeakHashMap<Integer,String> whitespace=new WeakHashMap<Integer,String>();
 	
 	public static String whiteSpace(int l) {
-		if (l > 0)
-			return whitespace.substring(0, l);
-        return "";
+		if (l<0) throw new Error("Negative whitespace not possible");
+		if (l==0) return "";
+		Integer il=new Integer(l);
+		String s=whitespace.get(il);
+		if (s!=null) return s;
+		
+		// new whitespace
+		if (l==1) {
+			s=" ";
+		} else {
+			s=createWhiteSpace(l);
+		}
+		whitespace.put(il,s);
+        return s;
+	}
+	
+	/**
+	 * Clever way of recursively generating whitespace.
+	 * Probably quite fast :-)
+	 * 
+	 * @param n
+	 * @return
+	 */
+	public static String createWhiteSpace(int n) {
+		if (n<1) throw new Error("createWhiteSpace size must be >=1");
+		int p=Bits.roundDownToPowerOfTwo(n);
+		
+		return whiteSpace(p/2)+whiteSpace(p/2)+whiteSpace(n-p);
 	}
 
 	public static String leftPad(String s, int l) {
