@@ -123,13 +123,22 @@ public class CircularBuffer<V> extends AbstractCollection<V> {
 		count=0;
 	}
 	
-	private int lastIndex() {
-		if (end>0) return end-1;
-		return count-1; // must be last index, since end=0, or returns -1 if buffer empty
+	public boolean  removeEnd() {
+		if (count>0) {
+			count-=1;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
-	public V getLast(int n) {
-		int i=lastIndex();
+	private int lastAddedIndex() {
+		if (end>0) return end-1;
+		return values.size()-1; // must be last index, since end=0, or returns -1 if buffer empty
+	}
+	
+	public V getLastAdded() {
+		int i=lastAddedIndex();
 		if (i<0) return null;
 		return values.get(i);
 	}
