@@ -21,4 +21,21 @@ public class TestSoftHashMap {
 		assertEquals(0,sh.size());
 		assertEquals(null,sh.get(5));
 	}
+	
+	/*
+	@Test public void testMemoryLimits() {
+		SoftHashMap<Integer,String> sh=new SoftHashMap<Integer,String>();
+		
+		String ws=Text.createWhiteSpace(1000000);
+		StringBuffer sb=new StringBuffer();
+		sb.append(ws);
+		
+		// we add 10GB of data to the map - this should work!
+		
+		for (int i=0; i<5000; i++) {
+			sh.put(i,sb.substring(0,sb.length()-1));
+		};
+	}
+	*/
+	
 }

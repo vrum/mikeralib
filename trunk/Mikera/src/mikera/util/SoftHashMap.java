@@ -61,10 +61,13 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 	
 	private void cleanUpNow() {
 		// check for cleared references and remove associated keys
-		for (K key: data.keySet()) {
+		Iterator<K> it=data.keySet().iterator();
+		
+		while (it.hasNext()) {
+			K key=it.next();
 			SoftReference<V> value=data.get(key);
 			if (value.get()==null) {
-				data.remove(key);
+				it.remove();
 			}
 		}		
 	}
