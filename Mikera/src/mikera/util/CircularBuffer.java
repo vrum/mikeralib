@@ -2,8 +2,17 @@ package mikera.util;
 
 import java.util.*;
 
+/**
+ * Circular Buffer implementation
+ * 
+ * Supports nulls, resizable buffer
+ * 
+ * @author Mike
+ *
+ * @param <V>
+ */
 public class CircularBuffer<V> extends AbstractCollection<V> {
-	// arraylist size is always less than or equal to maxSize
+	// ArrayList size is always less than or equal to maxSize
 	private int maxSize;
 	private ArrayList<V> values=new ArrayList<V>();
 	
@@ -98,7 +107,6 @@ public class CircularBuffer<V> extends AbstractCollection<V> {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean add(V value) {
 		if (maxSize<=0) return false;
 		
