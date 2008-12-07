@@ -11,8 +11,9 @@ import java.util.*;
  *
  * @param <V>
  */
-public class CircularBuffer<V> extends AbstractCollection<V> {
+public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V> {
 	// ArrayList size is always less than or equal to maxSize
+	// arraylist size equal to maxSize if buffer is full, or if there is any wraparound
 	private int maxSize;
 	private ArrayList<V> values=new ArrayList<V>();
 	
@@ -107,6 +108,17 @@ public class CircularBuffer<V> extends AbstractCollection<V> {
 		}
 	}
 	
+	/**
+	 * Adds the value only if the queue has spare capacity
+	 */
+	public boolean offer(V value) {
+		if (count<maxSize) {
+			return add(value);
+		} else {
+			return false;
+		}
+	}
+	
 	public boolean add(V value) {
 		if (maxSize<=0) return false;
 		
@@ -131,7 +143,11 @@ public class CircularBuffer<V> extends AbstractCollection<V> {
 		count=0;
 	}
 	
-	public boolean  removeEnd() {
+	/**
+	 * Remove end value (i.e. least recently added
+	 * @return true if value removes, false if buffer is empty
+	 */
+	public boolean tryRemoveEnd() {
 		if (count>0) {
 			count-=1;
 			return true;
@@ -140,9 +156,61 @@ public class CircularBuffer<V> extends AbstractCollection<V> {
 		}
 	}
 	
+	public V remove() {
+		if (count==0) throw new NoSuchElementException("Empty CircularBuffer in CircularBufer.remove()");
+		return removeFirstAdded();
+	}
+	
+	public V poll() {
+		return removeFirstAdded();
+	}
+	
+	public V removeFirstAdded() {
+		if (count>0) {
+			V value=get(count-1);
+			count-=1;
+			return value;
+		} else {
+			return null;
+		}
+	}
+	
+	public V removeLastAdded() {
+		if (count>0) {
+			V value=element();
+			count-=1;
+			end+=1;
+			return value;
+		} else {
+			return null;
+		}
+	}
+	
+	public V element() {
+		if (count==0) throw new NoSuchElementException("Empty CircularBuffer in CircularBufer.element()");
+		return values.get(firstAddedIndex());
+	}
+	
+	public V peek() {
+		if (count<=0) return null;
+		return values.get(firstAddedIndex());
+	}
+	
 	private int lastAddedIndex() {
 		if (end>0) return end-1;
 		return values.size()-1; // must be last index, since end=0, or returns -1 if buffer empty
+	}
+	
+	private int firstAddedIndex() {
+		if (count==0) return -1;
+		return positionIndex(count-1); 
+	}
+	
+	private int positionIndex(int n) {
+		if (n>=count) return -1;
+		int i=end-n-1;
+		if (i<0) i+=maxSize;
+		return i;
 	}
 	
 	public V getLastAdded() {
@@ -163,8 +231,8 @@ public class CircularBuffer<V> extends AbstractCollection<V> {
 	 */
 	public V get(int n) {
 		if (n>=count) return null;
-		int i=end-n-1;
-		if (i<0) i+=values.size(); // wrap around
+		if (n<0) throw new NoSuchElementException("Negative index in CircularBuffer.get(int) not allowed");
+		int i=positionIndex(n);
 		return values.get(i);
 	}
 }

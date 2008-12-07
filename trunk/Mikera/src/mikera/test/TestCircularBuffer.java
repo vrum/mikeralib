@@ -84,4 +84,56 @@ public class TestCircularBuffer {
 		}
 		assertEquals(145,total);
 	}
+	
+	@Test public void test4() {
+		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
+		for (int i=0; i<2; i++) {
+			cb.add(i+3);
+		}
+
+		assertEquals(4,cb.get(0));
+		assertEquals(3,cb.get(1));
+		
+		assertTrue(cb.tryRemoveEnd());
+		assertEquals(1,cb.getCount());
+
+		assertEquals(4,cb.get(0));
+		assertEquals(null,cb.get(1));
+		
+		assertTrue(cb.tryRemoveEnd());		
+		assertEquals(0,cb.getCount());
+		assertFalse(cb.tryRemoveEnd());
+		assertEquals(0,cb.getCount());
+		
+	}
+	
+	@Test public void testQueue() {
+		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
+		for (int i=1; i<=10; i++) {
+			cb.add(i);
+		}
+
+		assertEquals(false, cb.offer(15));
+		
+		assertEquals(10,cb.getCount());
+
+		assertEquals(1,cb.peek());
+		assertEquals(1,cb.element());
+		
+		assertEquals(1,cb.remove());
+		assertEquals(2,cb.poll());
+		assertEquals(8,cb.getCount());
+		
+		assertEquals(true, cb.offer(11));
+
+		for (int i=3; i<=10; i++) {
+			assertEquals(i,cb.poll());
+		}
+		
+		assertEquals(11,cb.peek());
+		assertEquals(11,cb.remove());
+		assertEquals(null,cb.peek());
+		assertEquals(0,cb.getCount());
+		
+	}
 }

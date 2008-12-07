@@ -4,7 +4,9 @@ import java.util.*;
 import java.lang.ref.*;
 
 /**
- * Hash map using soft references
+ * Hash map using soft references, ideal for caching values that can be re-used at a later date.
+ * 
+ * Under memory pressure, values will be cleared (switching to null) and memory released.
  * 
  * @author Mike
  *
@@ -16,7 +18,7 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 	
 	/**
 	 * Try keep a small number of references at a minimum in a circular buffer
-	 * Contains most recently accesses items
+	 * Contains most recently accessed items
 	 */
 	private final CircularBuffer<V> hardReferenceBuffer;
 

@@ -72,7 +72,10 @@ public final class ProbabilityPicker<O> {
 	
 	public void set(O o, double p) {
 		for (int i=0; i<count; i++) {
-			if (objects[i].equals(o)) setChance(i,p);
+			if (objects[i].equals(o)) {
+				setChance(i,p);
+				return;
+			}
 		}
 	}
 	
@@ -125,6 +128,17 @@ public final class ProbabilityPicker<O> {
 				return;
 			}
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void swap(int a, int b) {
+		double ca=chances[a];
+		double cb=chances[b];
+		O oa=(O)objects[a];
+		setChance(a,cb);
+		setChance(b,ca);
+		objects[a]=objects[b];
+		objects[b]=oa;	
 	}
 	
 	public static int parentIndex(int i) {
