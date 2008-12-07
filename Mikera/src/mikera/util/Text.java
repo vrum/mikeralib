@@ -159,7 +159,7 @@ public class Text {
 		return -1;
 	}
  
-	private static WeakHashMap<Integer,String> whitespace=new WeakHashMap<Integer,String>();
+	private static SoftHashMap<Integer,String> whitespace=new SoftHashMap<Integer,String>();
 	
 	public static String whiteSpace(int l) {
 		if (l<0) throw new Error("Negative whitespace not possible");
