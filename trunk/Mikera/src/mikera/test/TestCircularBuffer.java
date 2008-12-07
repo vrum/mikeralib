@@ -6,8 +6,21 @@ import mikera.util.*;
 import java.util.*;
 
 public class TestCircularBuffer {
-	@Test public void test1() {
-		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
+	
+	// get a empty integer buffer with random position
+	public CircularBuffer<Integer> getIntegerBuffer(int i) {
+		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(i);
+		
+		for (int ii=Rand.r(10*i); ii>0; ii-- ) {
+			cb.add(ii);
+		}
+		
+		cb.clear();
+		return cb;
+	}
+	
+	@Test public void testSize() {
+		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		
 		for (int i=0; i<107; i++) {
 			cb.add(i);
@@ -32,6 +45,7 @@ public class TestCircularBuffer {
 		assertEquals(null,cb.get(5));
 		assertEquals(null,cb.get(1000));
 		
+		// expand buffer to 20
 		cb.setMaxSize(20);
 		assertEquals(5,cb.getCount());
 		assertEquals(64,cb.get(0));
@@ -49,15 +63,28 @@ public class TestCircularBuffer {
 		assertEquals(null,cb.get(20));
 		assertEquals(null,cb.get(1000));
 		
+		// make very small
 		cb.setMaxSize(2);
 		assertEquals(2,cb.getCount());
 		assertEquals(106,cb.get(0));
 		assertEquals(105,cb.get(1));
 		assertEquals(null,cb.get(2));
+		
+		// zero size buffer should also work!!
+		cb.setMaxSize(0);
+		assertEquals(0,cb.getCount());
+		assertEquals(null,cb.get(10));
+		assertEquals(null,cb.get(0));
+		assertEquals(null,cb.peek());
+		cb.add(100);
+		assertEquals(0,cb.getCount());
+		assertEquals(null,cb.poll());
+		assertEquals(0,cb.getCount());
+		
 	}
 	
 	@Test public void test2() {
-		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
+		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		for (int i=0; i<8; i++) {
 			cb.add(i);
 		}
@@ -72,7 +99,7 @@ public class TestCircularBuffer {
 	}
 	
 	@Test public void test3() {
-		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
+		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		for (int i=0; i<20; i++) {
 			cb.add(i);
 		}
@@ -108,7 +135,7 @@ public class TestCircularBuffer {
 	}
 	
 	@Test public void testQueue() {
-		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
+		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		for (int i=1; i<=10; i++) {
 			cb.add(i);
 		}

@@ -160,39 +160,25 @@ public class Text {
 	}
  
 	/**
-	 * Soft hashmap containing whitespace of various lengths
+	 * Soft HashMap containing whitespace strings of various lengths
 	 */
-	private static SoftHashMap<Integer,String> whitespace=new SoftHashMap<Integer,String>();
+	private static SoftHashMap<Integer,String> whiteSpaceStore=new SoftHashMap<Integer,String>();
+	private static String whiteSpaceString="                                "; // initial length of 32
 	
 	public static String whiteSpace(int l) {
 		if (l<0) throw new Error("Negative whitespace not possible");
 		if (l==0) return "";
-		Integer il=new Integer(l);
-		String s=whitespace.get(il);
+		
+		String s=whiteSpaceStore.get(l);
 		if (s!=null) return s;
-		
-		// new whitespace
-		if (l==1) {
-			s=" ";
-		} else {
-			s=createWhiteSpace(l);
+
+		while (whiteSpaceString.length()<l) {
+			whiteSpaceString=whiteSpaceString+whiteSpaceString;
 		}
-		whitespace.put(il,s);
+
+		s=whiteSpaceString.substring(0, l);
+		whiteSpaceStore.put(l,s);
         return s;
-	}
-	
-	/**
-	 * Clever way of recursively generating whitespace.
-	 * Probably quite fast :-)
-	 * 
-	 * @param n
-	 * @return
-	 */
-	public static String createWhiteSpace(int n) {
-		if (n<1) throw new Error("createWhiteSpace size must be >=1");
-		int p=Bits.roundDownToPowerOfTwo(n);
-		
-		return whiteSpace(p/2)+whiteSpace(p/2)+whiteSpace(n-p);
 	}
 
 	public static String leftPad(String s, int l) {

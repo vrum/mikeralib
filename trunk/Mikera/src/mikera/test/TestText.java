@@ -6,11 +6,10 @@ import mikera.util.*;
 
 public class TestText {
 	@Test public void testWhiteSpace() {
-		assertEquals("   ",Text.createWhiteSpace(3));
+		assertEquals("   ",Text.whiteSpace(3));
 		
 		int n=Rand.d(10,10);
-		assertEquals(n,Text.createWhiteSpace(n).length());
-		
+		assertEquals(n,Text.whiteSpace(n).length());
 	}
 	
 	@Test public void testRoman() {
