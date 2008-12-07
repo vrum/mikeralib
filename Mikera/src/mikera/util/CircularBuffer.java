@@ -5,11 +5,11 @@ import java.util.*;
 /**
  * Circular Buffer implementation
  * 
- * Supports nulls, resizable buffer
+ * Supports nulls, variable size buffer, fast random access reads
  * 
  * @author Mike
  *
- * @param <V>
+ * @param <V> Type of object contained in buffer
  */
 public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V> {
 	// ArrayList size is always less than or equal to maxSize
@@ -20,6 +20,11 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 	private int end=0;
 	private int count=0;
 	
+	/**
+	 * Construct a new, empty circular buffer
+	 * 
+	 * @param n Capacity of buffer
+	 */
 	public CircularBuffer(int n) {
 		setMaxSize(n);
 	}
@@ -119,6 +124,10 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 		}
 	}
 	
+	/**
+	 * Unconditionally adds a value to the buffer
+	 * If full, first added item will be deleted to make space
+	 */
 	public boolean add(V value) {
 		if (maxSize<=0) return false;
 		
