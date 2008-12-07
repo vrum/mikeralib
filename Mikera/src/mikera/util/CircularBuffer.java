@@ -17,7 +17,7 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 	private int maxSize;
 	private ArrayList<V> values=new ArrayList<V>();
 	
-	private int end=0; // end index
+	private int end=0; // end index, always one more than last value added
 	private int count=0;
 	
 	/**
@@ -107,7 +107,7 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 				for (int i=0; i<newSize; i++) {
 					values.set(i,values.get(end-newSize+i));
 				}
-				end=newSize;
+				end=newSize; // start position
 			}
 			
 			// shorten array by removing end values
@@ -154,8 +154,6 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 		return value;
 	}
 	
-	
-	
 	/**
 	 * Adds the value only if the queue has spare capacity
 	 */
@@ -177,22 +175,45 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 		int vs=values.size();
 		if (vs<maxSize) {
 			// append
-			values.add(value);
+			if (end==vs) {
+				values.add(value);
+			} else {
+				values.set(end, value);
+			}
 			end++;
 			count++;
 		} else {
 			// cycle and replace old elements
-			if (end==vs) end=0;
+			if (end==maxSize) end=0;
 			values.set(end,value);
 			end++;
 			if (count<maxSize) count++;
-			if (end>=vs) end=0;
 		}
 		return true;
 	}
 	
 	public void clear() {
+		// clear values from arraylist
+		values.clear();
 		count=0;
+		end=0;
+	}
+	
+	public boolean sanityCheck() {
+		if (end<0) throw new Error("0");
+		if ((end==0)&&(count>0)) throw new Error("0a");
+		if ((maxSize>0)&&(end>maxSize)) throw new Error("1");
+		int vs=values.size();
+		if (count>vs) throw new Error("2");
+		if ((count>end) && (vs<maxSize)) throw new Error("3");
+		int wrap=Math.max(0,count-end);
+		for (int i=end; i<vs; i++) {
+			if ((i<vs-wrap)&&(values.get(i)!=null)) throw new Error("4");
+		}
+		for (int i=0; i<end-count; i++) {
+			if (values.get(i)!=null) throw new Error("5");
+		}
+		return true;
 	}
 	
 	/**
@@ -219,8 +240,9 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 	
 	public V removeFirstAdded() {
 		if (count>0) {
-			V value=get(count-1);
-			values.set(positionIndex(count-1),null);
+			int i=positionIndex(count-1);
+			V value=values.get(i);
+			values.set(i,null);
 			count-=1;
 			return value;
 		} else {
@@ -237,7 +259,7 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 			end-=1;
 			
 			// handle wrap - this is OK, since values.size()=maxSize when there is any wrap
-			if (end<0) end+=maxSize;
+			if ((end<=0)&&(count>0)) end+=maxSize;
 			return value;
 		} else {
 			return null;
@@ -262,7 +284,7 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 	
 	private int lastAddedIndex() {
 		if (end>0) return end-1;
-		return values.size()-1; // must be last index, since end=0, or returns -1 if buffer empty
+		return -1; 
 	}
 	
 	private int firstAddedIndex() {
@@ -272,7 +294,7 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 	
 	private int positionIndex(int n) {
 		int i=end-n-1;
-		if (i<0) i+=maxSize;
+		if (i<0) i+=maxSize; // note: valid because values.size()==maxSize must be full with any wraparound
 		return i;
 	}
 	
@@ -298,7 +320,7 @@ public class CircularBuffer<V> extends AbstractQueue<V> {
 		return getLocal(n);
 	}
 	
-	// assumes bounds already checked
+	// assumes bounds already checked. i.e. 0<=n<count
 	private V getLocal(int n) {
 		int i=positionIndex(n);
 		return values.get(i);		
