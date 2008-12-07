@@ -25,6 +25,8 @@ public class TestCircularBuffer {
 		for (int i=0; i<100; i++) {
 			if (Rand.d(3)==1) cb.setMaxSize(Rand.r(20));
 			if (Rand.d(3)==1) cb.add(Rand.d(100));
+			if (Rand.d(3)==1) cb.removeFirstAdded();
+			if (Rand.d(3)==1) cb.removeLastAdded();
 			if (Rand.d(3)==1) cb.poll();
 		}
 	}
@@ -126,7 +128,7 @@ public class TestCircularBuffer {
 		assertEquals(145,total);
 	}
 	
-	@Test public void testRemoveEnd() {
+	@Test public void testRemoveEnds() {
 		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
 		for (int i=0; i<2; i++) {
 			cb.add(i+3);
@@ -146,6 +148,25 @@ public class TestCircularBuffer {
 		assertFalse(cb.tryRemoveEnd());
 		assertEquals(0,cb.getCount());
 		
+		cb.clear();
+		for (int i=1; i<=10; i++) {
+			cb.add(i);
+		}
+		assertEquals(10,cb.removeLastAdded());
+		assertEquals(1,cb.removeFirstAdded());
+		assertEquals(9,cb.removeLastAdded());
+		assertEquals(2,cb.removeFirstAdded());
+		assertEquals(6,cb.getCount());
+		assertEquals(8,cb.removeLastAdded());
+		assertEquals(3,cb.removeFirstAdded());
+		assertEquals(7,cb.removeLastAdded());
+		assertEquals(4,cb.removeFirstAdded());
+		assertEquals(6,cb.removeLastAdded());
+		assertEquals(5,cb.removeFirstAdded());
+		assertEquals(0,cb.getCount());
+		assertEquals(null,cb.removeLastAdded());
+		assertEquals(null,cb.removeFirstAdded());
+		assertEquals(0,cb.getCount());
 	}
 	
 	@Test public void testRemove() {
