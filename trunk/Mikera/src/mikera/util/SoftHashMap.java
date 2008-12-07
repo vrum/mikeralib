@@ -18,7 +18,7 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 	
 	/**
 	 * Try keep a small number of references at a minimum in a circular buffer
-	 * Contains most recently accessed items
+	 * Contains most recently added or accessed items
 	 */
 	private final CircularBuffer<V> hardReferenceBuffer;
 
@@ -35,10 +35,9 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 	}
 
 	public V get(Object key) {
-		V value=null;
 		SoftReference<V> reference = data.get(key);
 		if (reference != null) {
-			value = reference.get();
+			V value = reference.get();
 			if (value==null) {
 				// remove the key as well
 				data.remove(key);
@@ -46,16 +45,17 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 			} else {
 				// add to recently accessed list
 				hardReferenceBuffer.add(value);
+				return value;
 			}
 		}
-		return value;
+		return null;
 	}
 
 
 	/**
 	 * Call cleanup now and again to remove garbage collected references
 	 */
-	private void cleanUp() {
+	private void maybeCleanUp() {
 		// do this quite rarely
 		if (Rand.r(data.size())>0) return;
 		cleanUpNow();
@@ -75,7 +75,7 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 	}
 	
 	public V put(K key, V value) {	
-		cleanUp(); 
+		maybeCleanUp(); 
 		
 		data.put(key, new SoftReference<V>(value));
 		// add to recently accessed list
@@ -85,7 +85,7 @@ public class SoftHashMap<K,V> extends AbstractMap<K,V> {
 	}
 
 	public V remove(Object key) {
-		cleanUp(); 
+		maybeCleanUp(); 
 		
 		V value = data.remove(key).get();
 		return value;

@@ -16,7 +16,8 @@ public class Bits {
 	}
 	
 	public static int roundDownToPowerOfTwo(int n) {
-		return n & (~(fillBitsRight(n)>>1));	}
+		return n & (~(fillBitsRight(n)>>1));	
+	}
 	
 	public static long roundDownToPowerOfTwo(long n) {
 		return n & (~(fillBitsRight(n)>>1));
