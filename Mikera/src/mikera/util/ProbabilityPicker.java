@@ -141,6 +141,17 @@ public final class ProbabilityPicker<O> {
 		objects[b]=oa;	
 	}
 	
+	/*
+	 * Branching logic is as follows:
+	 * 
+	 * For index i:
+	 *   branch 0 child is i + order(i)
+	 *   branch 1 child is i + 2*order(i)
+	 *   
+	 * Where order(0)=1
+	 * And order of any child is order of parent times two
+	 */
+	
 	public static int parentIndex(int i) {
 		int po=order(i);
 		return parentIndex(i,po);
@@ -151,7 +162,7 @@ public final class ProbabilityPicker<O> {
 	}
 	
 	public static int childIndex(int i, int branch) {
-		return i+(1+branch)*order(i);
+		return childIndex(i,order(i),branch);
 	}
 	
 	private static int childIndex(int i, int ir, int branch) {

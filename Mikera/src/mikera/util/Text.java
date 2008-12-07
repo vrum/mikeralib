@@ -159,6 +159,9 @@ public class Text {
 		return -1;
 	}
  
+	/**
+	 * Soft hashmap containing whitespace of various lengths
+	 */
 	private static SoftHashMap<Integer,String> whitespace=new SoftHashMap<Integer,String>();
 	
 	public static String whiteSpace(int l) {
