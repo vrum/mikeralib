@@ -19,6 +19,16 @@ public class TestCircularBuffer {
 		return cb;
 	}
 	
+	@Test public void testRandomly() {
+		CircularBuffer<Integer> cb=getIntegerBuffer(10);
+		
+		for (int i=0; i<100; i++) {
+			if (Rand.d(3)==1) cb.setMaxSize(Rand.r(20));
+			if (Rand.d(3)==1) cb.add(Rand.d(100));
+			if (Rand.d(3)==1) cb.poll();
+		}
+	}
+	
 	@Test public void testSize() {
 		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		
@@ -83,7 +93,7 @@ public class TestCircularBuffer {
 		
 	}
 	
-	@Test public void test2() {
+	@Test public void testClear() {
 		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		for (int i=0; i<8; i++) {
 			cb.add(i);
@@ -96,9 +106,13 @@ public class TestCircularBuffer {
 		}
 		assertEquals(7,cb.get(0));
 		assertEquals(8,cb.getCount());
+		
+		cb.clear();
+		assertEquals(null,cb.get(0));
+		assertEquals(0,cb.getCount());
 	}
 	
-	@Test public void test3() {
+	@Test public void testIterator() {
 		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		for (int i=0; i<20; i++) {
 			cb.add(i);
@@ -112,7 +126,7 @@ public class TestCircularBuffer {
 		assertEquals(145,total);
 	}
 	
-	@Test public void test4() {
+	@Test public void testRemoveEnd() {
 		CircularBuffer<Integer> cb=new CircularBuffer<Integer>(10);
 		for (int i=0; i<2; i++) {
 			cb.add(i+3);
@@ -132,6 +146,27 @@ public class TestCircularBuffer {
 		assertFalse(cb.tryRemoveEnd());
 		assertEquals(0,cb.getCount());
 		
+	}
+	
+	@Test public void testRemove() {
+		CircularBuffer<Integer> cb=getIntegerBuffer(10);
+		for (int i=1; i<=10; i++) {
+			cb.add(i);
+		}
+		
+		assertEquals(3,cb.removeRange(5,3));
+		assertEquals(7,cb.size());
+		
+		assertEquals(10,cb.get(0));
+		assertEquals(6,cb.get(4));
+		assertEquals(2,cb.get(5));
+		assertEquals(1,cb.get(6));
+		assertEquals(null,cb.get(7));
+		
+		assertEquals(6,cb.remove(4));
+		assertEquals(2,cb.remove(4));
+		assertEquals(1,cb.remove(4));
+		assertEquals(4,cb.size());
 	}
 	
 	@Test public void testQueue() {

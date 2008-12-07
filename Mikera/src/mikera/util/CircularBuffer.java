@@ -11,7 +11,7 @@ import java.util.*;
  *
  * @param <V> Type of object contained in buffer
  */
-public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V> {
+public class CircularBuffer<V> extends AbstractQueue<V> {
 	// ArrayList size is always less than or equal to maxSize
 	// arraylist size equal to maxSize if buffer is full, or if there is any wraparound
 	private int maxSize;
@@ -38,7 +38,7 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 	}
 	
 	public int size() {
-		return count;
+		return getCount();
 	}
 	
 	public Iterator<V> iterator() {
@@ -50,7 +50,7 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 			}
 			
 			public V next() {
-				V value=get(pos);
+				V value=getLocal(pos);
 				pos++;
 				return value;
 			}
@@ -62,56 +62,88 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 		};
 	}
 	
-	public void setMaxSize(int n) {
+	public void setMaxSize(int newSize) {
 		int vs=values.size();
-		if (n>=vs) {
+		if (newSize>=vs) {
 			// extend
 			// shifting to add nulls if needed (i.e. if there is wrap around)
 			// otherwise no need to resize - will grow automatically
 			int shift=Math.max(0, count-end);
 			if (shift>0) {
-				int add=n-vs; // number of nulls to add
-				values.ensureCapacity(n);
+				int add=newSize-vs; // number of nulls to add
+				values.ensureCapacity(newSize);
 				for (int i=0; i<add; i++) {
 					values.add(null);
 				}
 				
-				for (int i=n-1; i>n-1-shift; i--) {
+				for (int i=newSize-1; i>newSize-1-shift; i--) {
 					values.set(i,values.get(i-add));
 					values.set(i-add,null);
 				}
 			}
 			
-			maxSize=n;
+			maxSize=newSize;
 			return;
 		} else {
 			// shrink
-			int overlap=Math.max(0, (vs-n)-(vs-end)); // number of valid items rolling around at end of values
-			int cut=Math.min(vs-end, vs-n);
-			if ((cut+overlap)!=(vs-n)) throw new Error("Unexpected....");
+			int wrap=Math.max(0,count-end);
+			int keepWrap=Math.min(wrap, newSize-end); // number of items rolling around at end of values that we want to keep
 			
-			if (overlap>0) {
-				// shuffle items back to to start or array
-				for (int i=0; i<end-overlap; i++) {
-					values.set(i,values.get(i+overlap));
+			if (keepWrap>=0) {
+				// we know newSize>=end
+				// move items to fill up to newSize
+				for (int i=0; i<keepWrap; i++) {
+					values.set(newSize-keepWrap+i,values.get(vs-keepWrap+i));
 				}	
-				end-=overlap;
 			} else {
-				// pull items from end of values
-				for (int i=0; i<vs-end-cut; i++) {
-					values.set(end-overlap+i,values.get(end+i));
+				// pull items back to start of array, filling up to newSize = new end position
+				for (int i=0; i<newSize; i++) {
+					values.set(i,values.get(end-newSize+i));
 				}
+				end=newSize;
 			}
 			
-			// shorten array
-			for (int i=vs-1; i>=(vs-(cut+overlap)); i--) {
+			// shorten array by removing end values
+			for (int i=vs-1; i>=newSize; i--) {
 				values.remove(i);
 			}
 			
-			maxSize=n;
-			count=Math.min(count,n); // number removed
+			maxSize=newSize;
+			count=Math.min(count,newSize); // number removed
 		}
 	}
+	
+	/**
+	 * Remove a range of items from the buffer
+	 * 
+	 * @param startIndex
+	 * @param number
+	 * @return
+	 */
+	public int removeRange(int startIndex, int number) {
+		if (startIndex<0) throw new ArrayIndexOutOfBoundsException("Negative index: "+startIndex);
+		if (startIndex>=count) return 0;
+		if (startIndex+number>count) number=count-startIndex;
+		if (number<=0) return 0;
+		
+		int shiftAmount=count-startIndex-number;
+		for (int i=0; i<shiftAmount; i++) {
+			values.set(positionIndex(startIndex+i), values.get(positionIndex(count-shiftAmount+i)));
+		}
+		
+		count-=number;
+		return number;
+	}
+	
+	public V remove(int index) {
+		if (index<0) throw new ArrayIndexOutOfBoundsException("Negative index: "+index);
+		if (index>=count) throw new ArrayIndexOutOfBoundsException("Out of bounds: "+index);
+		V value=getLocal(index);
+		removeRange(index,1);
+		return value;
+	}
+	
+	
 	
 	/**
 	 * Adds the value only if the queue has spare capacity
@@ -153,7 +185,7 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 	}
 	
 	/**
-	 * Remove end value (i.e. least recently added
+	 * Remove end value (i.e. least recently added)
 	 * @return true if value removes, false if buffer is empty
 	 */
 	public boolean tryRemoveEnd() {
@@ -196,7 +228,7 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 	}
 	
 	public V element() {
-		if (count==0) throw new NoSuchElementException("Empty CircularBuffer in CircularBufer.element()");
+		if (count<=0) throw new NoSuchElementException("Empty CircularBuffer in CircularBufer.element()");
 		return values.get(firstAddedIndex());
 	}
 	
@@ -236,12 +268,16 @@ public class CircularBuffer<V> extends AbstractCollection<V> implements Queue<V>
 	 * Get an item from the circular buffer
 	 * 
 	 * @param n Index of item in circular buffer (0 = most recently added, getCount()-1 = last item)
-	 * @return Value at position n from front of buffer
+	 * @return Value at position n from front of buffer, null if beyond end of buffer
 	 */
 	public V get(int n) {
 		if (n>=count) return null;
-		if (n<0) throw new NoSuchElementException("Negative index in CircularBuffer.get(int) not allowed");
+		if (n<0) throw new ArrayIndexOutOfBoundsException("Negative index in CircularBuffer.get(int) not allowed");
+		return getLocal(n);
+	}
+	
+	private V getLocal(int n) {
 		int i=positionIndex(n);
-		return values.get(i);
+		return values.get(i);		
 	}
 }
