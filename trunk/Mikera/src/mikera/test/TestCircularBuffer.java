@@ -125,6 +125,16 @@ public class TestCircularBuffer {
 		assertTrue(cb.sanityCheck());
 	}
 	
+	
+	@Test public void testTreeMap() {
+		TreeMap<Integer,String> tm=new TreeMap<Integer,String>();
+		
+		tm.put(1,"A");
+		tm.put(2, "B");
+		
+		assertTrue(tm.size()==2);
+	}
+	
 	@Test public void testIterator() {
 		CircularBuffer<Integer> cb=getIntegerBuffer(10);
 		for (int i=0; i<20; i++) {
