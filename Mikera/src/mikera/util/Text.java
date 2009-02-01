@@ -158,6 +158,16 @@ public class Text {
 		}
 		return -1;
 	}
+	
+	public static String arrayToString(float[] as) {
+		StringBuffer sb=new StringBuffer("{");
+		for (int i = 0; i < as.length; i++) {
+			if (i>0) sb.append(", ");
+			sb.append(Float.toString(as[i]));
+		}
+		sb.append("}");
+		return sb.toString();
+	}
  
 	/**
 	 * Soft HashMap containing whitespace strings of various lengths
