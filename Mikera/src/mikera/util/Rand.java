@@ -44,6 +44,10 @@ public class Rand {
 	public static final double nextDouble() {
 		return rand.nextDouble();
 	}
+	
+	public static final float nextFloat() {
+		return (float)nextDouble();
+	}
 
     /**
      *  Returns random number uniformly distributed in [n1, n2] range.
