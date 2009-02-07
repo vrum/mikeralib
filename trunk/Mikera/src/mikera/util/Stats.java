@@ -18,4 +18,8 @@ public class Stats {
 		if (d==null) return 0.0;
 		return d.doubleValue();
 	}
+	
+	public static void printStat(String s) {
+		System.out.println(s+"\t = "+getStat(s));
+	}
 }
