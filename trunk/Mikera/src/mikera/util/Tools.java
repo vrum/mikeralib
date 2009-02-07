@@ -26,11 +26,13 @@ public class Tools {
 	
 	public static void writeXMLToFile(Document doc, String fileName) {
 		try {
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			TransformerFactory factory=TransformerFactory.newInstance();
+			factory.setAttribute("indent-number", 4);
+			Transformer transformer = factory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			Source source = new DOMSource(doc);
-			Result result = new StreamResult(new File(fileName));
+			Result result = new StreamResult(new OutputStreamWriter(new FileOutputStream(new File(fileName)),"UTF-8"));
 			transformer.transform(source, result);
 		} catch (Throwable t) {
 			throw new Error(t);

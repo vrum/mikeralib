@@ -1,0 +1,21 @@
+package mikera.util;
+
+import java.util.*;
+
+public class Stats {
+	private static final HashMap<String,Double> stats=new HashMap<String,Double>();
+	
+	public static void addStat(String s, double v) {
+		setStat(s,getStat(s)+v);
+	}
+	
+	public static void setStat(String s, double v) {
+		stats.put(s,Double.valueOf(v));
+	}
+	
+	public static double getStat(String s) {
+		Double d=stats.get(s);
+		if (d==null) return 0.0;
+		return d.doubleValue();
+	}
+}
