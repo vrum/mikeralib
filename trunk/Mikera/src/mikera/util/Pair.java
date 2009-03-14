@@ -4,6 +4,16 @@ public class Pair<A,B> implements Cloneable, Comparable<Pair<A,B>> {
 	public A a;
 	public B b;
 	
+	public Pair() {
+		a=null;
+		b=null;
+	}
+	
+	public Pair(A a, B b) {
+		this.a=a;
+		this.b=b;
+	}
+	
 	public boolean equals(Pair<A,B> p) {
 		if (p==null) return false;
 		
@@ -40,10 +50,17 @@ public class Pair<A,B> implements Cloneable, Comparable<Pair<A,B>> {
 				int v=c.compareTo((Comparable)p.b);
 				if (v!=0) return v;
 			}	
-		} else {
-			throw new Error("Can't compare Pair: second component type not comparable");
 		}
 		return 0;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public Pair<A,B> clone() {
+		try {
+			Pair<A,B> p=(Pair<A,B>)super.clone();
+			return p;
+		} catch (CloneNotSupportedException e) {
+			throw new Error(e);
+		}
+	}
 }
