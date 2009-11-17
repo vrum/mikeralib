@@ -1,7 +1,7 @@
 #labels mikera,mikeralib,Featured,index,datastructure,algorithms
 = Introduction =
 
-[Persistent Data Structures for Java]
+[PersistentDataStructures Persistent Data Structures for Java]
 
 
 = Details =
